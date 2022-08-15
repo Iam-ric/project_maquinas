@@ -1,0 +1,55 @@
+
+POST http://127.0.0.1:8080/machine-halt
+Content-Type: application/json
+
+{
+  "id": "100",
+  "machine_tag": "Joao",
+  "start_time": "18:00",
+  "end_time": "18:31",
+  "reason": "sei lá"
+}
+
+
+###
+POST http://127.0.0.1:8080/machine-halt
+Content-Type: application/json
+
+{
+  "id": "200",
+  "machine_tag": "John",
+  "start_time": "18:00",
+  "end_time": "18:31",
+  "reason": "sei lá"
+}
+
+###
+POST http://127.0.0.1:8080/machine-halt
+Content-Type: application/json
+
+{
+  "id": "300",
+  "machine_tag": "Mary",
+  "start_time": "18:00",
+  "end_time": "18:31",
+  "reason": "sei lá"
+}
+
+
+###
+GET http://127.0.0.1:8080/machine-halt
+Accept: application/json
+
+###
+GET http://127.0.0.1:8080/machine-halt/200
+Accept: application/json
+
+###
+GET http://127.0.0.1:8080/machine-halt/500
+Accept: application/json
+
+###
+DELETE http://127.0.0.1:8080/machine-halt/100
+
+###
+DELETE http://127.0.0.1:8080/machine-halt/500
