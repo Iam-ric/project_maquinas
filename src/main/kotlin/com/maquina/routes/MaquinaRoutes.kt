@@ -149,8 +149,11 @@ fun Route.maquinaRouting() {
         delete("/all") {
 
             var deletar= maquinaStorage.removeAll { it != null }
-                call.respond(deletar)
-                call.respondText("Customer removed correctly", status = HttpStatusCode.Accepted)
+            if(deletar == true){
+                call.respondText("Todas máquinas foram excluídas!", status = HttpStatusCode.Accepted)
+            }else{
+                call.respondText("Não foi possível excluir as máquinas!", status = HttpStatusCode.BadRequest)
+            }
 
         }
     }
