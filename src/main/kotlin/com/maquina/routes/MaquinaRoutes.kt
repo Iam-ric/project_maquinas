@@ -61,28 +61,41 @@ fun Route.maquinaRouting() {
             )
             val time_start = LocalTime.parse(interval_start)
             val time_end = LocalTime.parse(interval_end)
-            //val time_maquina = LocalTime.parse()
-
             val maquina = maquinaStorage.find { it.machine_tag == tags }
-            var recebe_start = LocalTime.parse(maquina?.start_time ?: null)
-            val recebe_end = LocalTime.parse(maquina?.end_time ?: null)
+            var recebe_start = LocalTime.parse(maquina?.start_time)
+            var recebe_end = LocalTime.parse(maquina?.end_time)
 
-            if (maquina != null) {
-                if (time_start >= recebe_start && time_end <= recebe_end){
-                    call.respond(maquina)
-                    call.respondText("Maquina e seu intervalo encontrado com sucesso", status = HttpStatusCode.OK)
-                } else {
-                    call.respondText("intervalo não encotrado! $time_start && $time_end && $recebe_start && $recebe_end", status = HttpStatusCode.BadRequest)
-                }
+            fun <T> concatenate(vararg lists: List<T>): List<T> {
+                return listOf(*lists).flatten()
             }
 
+            fun lista (param: String) :String{
+                var test = concatenate(param.toList())
+                return test.toString()
+            }
+
+                if(maquina != null && recebe_start != null && recebe_end != null) {
+
+                    if (time_start >= recebe_start && time_end <= recebe_end) {
+                        call.respond(lista(maquina.toString()))
+                        call.respondText("Maquina e seu intervalo encontrado com sucesso", status = HttpStatusCode.OK)
+
+                    }
+                        call.respond(maquina)
+                        call.respondText(
+                            "intervalo não encotrado! $time_start && $time_end && $recebe_start && $recebe_end",
+                            status = HttpStatusCode.BadRequest
+                        )
+
+                }
         }
 
         get("/list"){
             if (maquinaStorage.isNotEmpty()) {
                 call.respond(maquinaStorage)
+                call.respondText("",status = HttpStatusCode.OK)
             } else {
-                call.respondText("Maquina e seu intervalo encontrado com sucesso", status = HttpStatusCode.OK)
+                call.respondText("Maquina e seu intervalo não encontrado", status = HttpStatusCode.OK)
             }
         }
         put("/{id}/{end_time}"){
@@ -134,12 +147,11 @@ fun Route.maquinaRouting() {
         }
 
         delete("/all") {
-            val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
-            if (maquinaStorage.removeIf { it.id == id }) {
+
+            var deletar= maquinaStorage.removeAll { it != null }
+                call.respond(deletar)
                 call.respondText("Customer removed correctly", status = HttpStatusCode.Accepted)
-            } else {
-                call.respondText("Not Found", status = HttpStatusCode.NotFound)
-            }
+
         }
     }
 }
