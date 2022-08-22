@@ -2,6 +2,7 @@ package com.maquina
 
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 data class Maquina(
     val id: String,

@@ -6,6 +6,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.sql.Time
 import java.time.LocalTime
 
 fun Route.maquinaRouting() {
@@ -15,10 +16,12 @@ fun Route.maquinaRouting() {
         }
         post{
             val maquina = call.receive<Maquina>()
-            maquinaStorage.add(maquina)
+                maquinaStorage.add(maquina)
+
             call.respondText("Maquina cadastrada com sucesso !", status = HttpStatusCode.Created)
         }
-        post ("/{machine_tag?}/{start_time}"){
+
+        post ("/{machine_tag?}/{start_time?}"){
             val tags = call.parameters["machine_tag"] ?: return@post call.respondText(
                 "machine_tag invalida!",
                 status = HttpStatusCode.BadRequest
@@ -27,6 +30,7 @@ fun Route.maquinaRouting() {
                 "start_time invalido!",
                 status = HttpStatusCode.BadRequest
             )
+
             val maquina =
                 maquinaStorage.find { it.machine_tag == tags && it.start_time == start } ?: return@post call.respondText(
                     "Maquina com a $tags não encontrada!",
@@ -46,7 +50,8 @@ fun Route.maquinaRouting() {
                 )
             call.respond(maquina)
         }
-        get("/list/{machine_tag}/{interval_start}/{interval_end}"){
+        //está com falha, 500
+        get("/list/{machine_tag?}/{interval_start?}/{interval_end?}"){
             val tags = call.parameters["machine_tag"] ?: return@get call.respondText(
                 "Maquina machine_tag não encontrada!",
                 status = HttpStatusCode.BadRequest
@@ -59,25 +64,17 @@ fun Route.maquinaRouting() {
                 "Intervalo final não encontrado!",
                 status = HttpStatusCode.BadRequest
             )
-            val time_start = LocalTime.parse(interval_start)
-            val time_end = LocalTime.parse(interval_end)
+            var time_start = Time.valueOf(interval_start)
+            var time_end = Time.valueOf(interval_end)
             val maquina = maquinaStorage.find { it.machine_tag == tags }
-            var recebe_start = LocalTime.parse(maquina?.start_time)
-            var recebe_end = LocalTime.parse(maquina?.end_time)
+            var recebe_start = Time.valueOf(maquina?.start_time)
+            var recebe_end = Time.valueOf(maquina?.end_time)
 
-            fun <T> concatenate(vararg lists: List<T>): List<T> {
-                return listOf(*lists).flatten()
-            }
-
-            fun lista (param: String) :String{
-                var test = concatenate(param.toList())
-                return test.toString()
-            }
 
                 if(maquina != null && recebe_start != null && recebe_end != null) {
 
                     if (time_start >= recebe_start && time_end <= recebe_end) {
-                        call.respond(lista(maquina.toString()))
+                        call.respond((maquina.toString()))
                         call.respondText("Maquina e seu intervalo encontrado com sucesso", status = HttpStatusCode.OK)
 
                     }
@@ -98,15 +95,18 @@ fun Route.maquinaRouting() {
                 call.respondText("Maquina e seu intervalo não encontrado", status = HttpStatusCode.OK)
             }
         }
-        put("/{id}/{end_time}"){
+        put("/{id?}/{end_time?}"){
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Identificador não encontrado!",
                 status = HttpStatusCode.BadRequest
             )
+            
             val endTimes = call.parameters["end_time"] ?: return@put call.respondText(
                 "end_time invalido!",
                 status = HttpStatusCode.BadRequest
             )
+
+            
             val maquina =
                 maquinaStorage.find { it.id == id } ?: return@put call.respondText(
                     "Maquina com o  id: $id não encontrada!",
@@ -122,7 +122,8 @@ fun Route.maquinaRouting() {
 
 
         }
-        put("/{id}/{reason}"){
+        // alteração na url, para entrar no desejado, melhorar isso
+        put("/list/{id?}/{reason?}"){
             val id = call.parameters["id"] ?: return@put call.respondText(
                 "Identificador não encontrado!",
                 status = HttpStatusCode.BadRequest
@@ -158,3 +159,4 @@ fun Route.maquinaRouting() {
         }
     }
 }
+
